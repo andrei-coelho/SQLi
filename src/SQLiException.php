@@ -1,0 +1,21 @@
+<?php
+namespace SQLi;
+
+class SQLiException extends \Exception {
+
+    public function __construct(int $code, string $msg = null){
+        parent::__construct($this -> generateMessage($code, $msg),1);
+    }
+
+    private function generateMessage(int $code, string $msg){
+        switch ($code) {
+            case 1:
+                return "Erro ao gerar o JSON";
+            case 2:
+                return "Este JSON não contém a(s) chaves(s): ".$msg;
+            case 3:
+                return "Nenhum banco de dados foi criado";
+        }
+    }
+
+}
