@@ -9,6 +9,8 @@ class SQLiException extends \Exception {
 
     private function generateMessage(int $code, string $msg){
         switch ($code) {
+			case 0:
+				return $msg;
             case 1:
                 return "Erro ao gerar o JSON";
             case 2:

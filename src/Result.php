@@ -4,11 +4,25 @@ namespace SQLi;
 
 class Result {
 
-    private $pdo;
-
+    private $pdo, $errorCode, $state = true;
+	
     public function __construct(\PDOStatement $pdo){
+		
+		$pdo->execute();
+		$res = $pdo->errorCode();
+		if($res !== "00000") $this->state = false;
+		$this->errorCode = $res;
         $this->pdo = $pdo;
+		
     }
+	
+	public function getCode(){
+		return $this->errorCode;
+	}
+	
+	public function hasError(){
+		return !$this->state;
+	}
 
     public function fetchAll(){
         return $this->pdo->fetchAll();
@@ -58,9 +72,5 @@ class Result {
         return $this->rowCount();
     }
 
-    // alias of rowCount
-    public function size(){
-        return $this->rowCount();
-    }
 
 }

@@ -5,7 +5,7 @@ spl_autoload_register(function($name) {
 	$prefix = 'SQLi\\';
 
 	if(strpos($name, $prefix) !== 0){
-		// não é uma classe SQLi
+		// não é uma classe da biblioteca SQLi
 		return;
 	}
 
@@ -18,6 +18,6 @@ spl_autoload_register(function($name) {
         return;
     }
 
-    throw new Exception("Esta classe {$name} não existe", 1);
+    throw new Exception("Esta classe {$nameFile} não existe na biblioteca SQLi", 1);
 
 });
