@@ -17,6 +17,10 @@ class SQLiException extends \Exception {
                 return "Este JSON não contém a(s) chaves(s): ".$msg;
             case 3:
                 return "Nenhum banco de dados foi criado";
+			case 4:
+                return "O Banco de dados ".$msg." não está cadastrado.";
+			case 5:
+				return "A quantidade de valores necessárias no array não está correta.";
         }
     }
 

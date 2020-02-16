@@ -1,0 +1,17 @@
+{
+    "mydb1":{
+        "driver":"mysql",
+        "host":"localhost",
+        "dbname":"webbot",
+        "user":"root",
+        "pass":""
+    },
+    "mydb2":{
+        "driver":"pgsql",
+        "host":"127.0.0.1",
+        "dbname":"other",
+        "user":"username",
+        "pass":"passuser",
+        "port":"10004"
+    }
+}

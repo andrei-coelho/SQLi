@@ -5,18 +5,22 @@ namespace SQLi;
 class DataBase {
     
     private $pdo;
-    private $driver, $host, $dbname, $user, $pass, $port, $charset;
+    private $alias, $driver, $host, $dbname, $user, $pass, $port, $charset;
     private $open = false;
+	
+	private $callback;
 
-    public function __construct($driver, $host, $dbname, $user, $pass, $charset, $port){
+    public function __construct($alias, $driver, $host, $dbname, $user, $pass, $charset, $port, $callback){
         
-        $this->driver = $driver;
-        $this->host   = $host;
-        $this->dbname = $dbname;
-        $this->user   = $user;
-        $this->pass   = $pass;
-		$this->charset= $charset;
-        $this->port   = $port;
+        $this->alias    = $alias;
+		$this->driver   = $driver;
+        $this->host     = $host;
+        $this->dbname   = $dbname;
+        $this->user     = $user;
+        $this->pass     = $pass;
+		$this->charset  = $charset;
+        $this->port     = $port;
+		$this->callback = $callback;
     
     }
 
@@ -32,7 +36,9 @@ class DataBase {
             try {
                 $this->pdo = new \PDO($strConn, $this->user, $this->pass);
             } catch (\PDOException $e){
-                echo $e;
+				if(($call = $this->callback) !== null){
+					$call($e, $this);
+				}
             }
             
             $this->open = true;
@@ -40,5 +46,23 @@ class DataBase {
         }
         return $this->pdo;
     }
+	
+	public function close(){
+		$this->pdo = null;
+	}
+	
+	// getters
+	
+	public function host(){
+		return $this -> host;
+	}
+	
+	public function dbname(){
+		return $this -> dbname;
+	}
+	
+	public function alias(){
+		return $this -> alias;
+	}
 
 }

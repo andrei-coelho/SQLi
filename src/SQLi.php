@@ -27,16 +27,19 @@ class SQLi {
 		string $user, 
 		string $pass, 
 		string $charset, 
-		$port
+		$port,
+		$callback
 	){
 		self::$databases[$alias] = new DataBase(
+			$alias,
 			$driver, 
 			$host, 
 			$dbname, 
 			$user, 
 			$pass,
 			$charset,			
-			$port
+			$port,
+			$callback
 		);
 
 	}
@@ -44,7 +47,7 @@ class SQLi {
 	/**
 	 *  Add new Data Bases using JSON
 	 */
-	public static function setDB(string $json){
+	public static function setDB(string $json, callable $callback = null){
 
 		$json = json_decode($json, true);
 		if(!$json) throw new SQLiException(1);
@@ -62,18 +65,19 @@ class SQLi {
 				$values['user'],
 				$values['pass'], 
 				$charset,
-				$port
+				$port,
+				$callback
 			);
 
 		}
 		
 	}
 
-	public static function getDB(string $aliasDB = ""):DataBase{
+	public static function getDB(string $aliasDB = ""){
 
 		if(count(self::$databases) === 0) throw new SQLiException(3);
-		$key = $aliasDB === ""? array_keys(self::$databases)[0] : $aliasDB;
-		if(!isset(self::$databases[$key])) throw new SQLiException(4);
+		$key = $aliasDB === "" ? array_keys(self::$databases)[0] : $aliasDB;
+		if(!isset(self::$databases[$key])) throw new SQLiException(4, $key);
 
 		return self::$databases[$key];
 	 
@@ -85,9 +89,10 @@ class SQLi {
 	 *  @param $values array
 	 *  @param $aliasDB string - Use this if you need select in other data base 
 	 */	
-	public function query(string $query, array $values = [], string $aliasDB = ""):Result{
-			
-		$pdo = self::getDB($aliasDB)->get();
+	public function query(string $query, array $values = [], string $aliasDB = ""){
+		
+		if(($pdo = self::getDB($aliasDB)->get()) === null) return false;
+	
 		$st = $pdo->prepare($query);
 		if(!$st) throw new SQLiException(0, $pdo->errorInfo()[2]);
 			
@@ -108,7 +113,11 @@ class SQLi {
 	public static function insert(string $insert, array $values, string $aliasDB = "", $pdo = false):bool{
 		
 		if(count($values) < 2) throw new SQLiException(5); 
-		if(!$pdo) $pdo = self::getDB($aliasDB)->get();
+		if(!$pdo && ($database = self::getDB($aliasDB)) !== false){
+			$pdo = $database->get();
+		}
+		
+		if($pdo === null) return false;
 		
 		$binds  = array_shift($values);
 		$insert  = "INSERT INTO ".trim($insert)." VALUES (";
@@ -135,7 +144,9 @@ class SQLi {
 	public static function lastInsert(string $insert, array $values, string $aliasDB = ""){
 		
 		if(count($values) < 2) throw new SQLiException(5); 
-		$pdo = self::getDB($aliasDB)->get();
+		if(($pdo = self::getDB($aliasDB)->get()) === null) return false;
+		if($pdo->hasError()) return false;
+		
 		return self::insert($insert, $values, $aliasDB, $pdo) ? $pdo->lastInsertId() : false;
 		
 	}
@@ -148,9 +159,8 @@ class SQLi {
 	 */	
 	public static function multiInsert(string $insert, array $values, string $aliasDB = ""):bool{
 		
-		$pdo = self::getDB($aliasDB)->get();
-
 		if(count($values) < 2) throw new SQLiException(5); 
+		if(($pdo = self::getDB($aliasDB)->get()) === null) return false;
 		
 		$binds  = array_shift($values);
 		$insert = "INSERT INTO ".trim($insert)." VALUES ";	
@@ -182,7 +192,7 @@ class SQLi {
 	 */
 	public static function exec(string $exec, array $values = [], string $aliasDB = ""):bool{
 		
-		$pdo = self::getDB($aliasDB)->get();
+		if(($pdo = self::getDB($aliasDB)->get()) === null) return false;
 		$st = $pdo->prepare($exec);
 		
 		if(!$st) throw new SQLiException(0, $pdo->errorInfo()[2]);
@@ -192,6 +202,28 @@ class SQLi {
 		
 		return !(new Result($st))->hasError();
 		
+	}
+	
+	/**
+	 *  close all connections 
+	 */
+	public static function closeAll(){
+		
+		foreach(self::$databases as $db){
+			$db->close();
+		}
+		
+	}
+
+	/**
+	 *  close connection using alias
+	 */
+	public static function close($aliasDB){
+
+		if(isset(self::$databases[$aliasDB])){
+			self::$databases[$aliasDB] -> close();
+		}
+
 	}
 
 	private static function hasKeys(array $keys){
