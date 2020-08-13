@@ -2,7 +2,7 @@
     "mydb1":{
         "driver":"mysql",
         "host":"localhost",
-        "dbname":"webbot",
+        "dbname":"test",
         "user":"root",
         "pass":""
     },
