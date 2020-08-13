@@ -8,21 +8,21 @@ class Result {
 	
     public function __construct(\PDOStatement $pdo){
 		
-		$pdo->execute();
-		$res = $pdo->errorCode();
-		if($res !== "00000") $this->state = false;
-		$this->errorCode = $res;
+        $pdo->execute();
+        $res = $pdo->errorCode();
+        if($res !== "00000") $this->state = false;
+        $this->errorCode = $res;
         $this->pdo = $pdo;
 		
     }
 	
-	public function getCode(){
-		return $this->errorCode;
-	}
-	
-	public function hasError(){
-		return !$this->state;
-	}
+    public function getCode(){
+        return $this->errorCode;
+    }
+
+    public function hasError(){
+        return !$this->state;
+    }
 
     public function fetchAll(){
         return $this->pdo->fetchAll();

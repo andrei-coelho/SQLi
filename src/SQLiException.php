@@ -9,18 +9,18 @@ class SQLiException extends \Exception {
 
     private function generateMessage(int $code, string $msg){
         switch ($code) {
-			case 0:
-				return $msg;
+            case 0:
+                return $msg;
             case 1:
                 return "Erro ao gerar o JSON";
             case 2:
                 return "Este JSON não contém a(s) chaves(s): ".$msg;
             case 3:
                 return "Nenhum banco de dados foi criado";
-			case 4:
+            case 4:
                 return "O Banco de dados ".$msg." não está cadastrado.";
-			case 5:
-				return "A quantidade de valores necessárias no array não está correta.";
+            case 5:
+                return "A quantidade de valores necessárias no array não está correta.";
         }
     }
 
